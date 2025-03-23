@@ -6,8 +6,11 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
+import connectDB from "./config/database";
 import swaggerDocument from "./docs/swagger.json";
 import errorHandler from "./middleware/errorHandler";
+import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
 import logger from "./utils/logger";
 
 dotenv.config();
@@ -27,6 +30,10 @@ app.use(
     })
 );
 
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+
+
 app.get("/api/health", (_req: Request, res: Response) => {
     res.json({ status: "ok", environment: process.env.NODE_ENV || "dev" });
 });
@@ -39,6 +46,7 @@ app.use((_req, _res, next) => {
 });
 
 app.use(errorHandler);
+connectDB();
 
 app.listen(PORT, () => {
     logger.info(`🚀 Server running on port ${PORT}`);

@@ -1,0 +1,20 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "InterestHub API",
+        "version": "1.0.0",
+        "description": "API documentation for InterestHub"
+    },
+    "paths": {
+        "/api/health": {
+            "get": {
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "API is up"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -5,6 +5,34 @@
         "version": "1.0.0",
         "description": "API documentation for InterestHub"
     },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication and login/logout operations"
+        },
+        {
+            "name": "Users",
+            "description": "User account and profile"
+        },
+        {
+            "name": "Posts",
+            "description": "Posts and content operations"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
     "paths": {
         "/api/health": {
             "get": {
@@ -92,6 +120,238 @@
                     },
                     "401": {
                         "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "description": "Issues a new access token using the refresh token stored in cookies.",
+                "responses": {
+                    "200": {
+                        "description": "New access token issued",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "token": "newAccessToken.jwt.token"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Missing or invalid refresh token",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Refresh token missing"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user",
+                "description": "Logs out the user by clearing the refresh token cookie.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Logged out successfully"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized or missing token",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Authorization header missing or invalid"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request password reset",
+                "description": "Sends a password reset link to the user's email if account exists.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "floyd@interesthub.io"
+                                    }
+                                },
+                                "required": [
+                                    "email"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reset link sent (or not, but message is same)",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "If an account with that email exists, a reset link has been sent."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password",
+                "description": "Resets the user's password using a valid reset token.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "reset-token-here"
+                                    },
+                                    "newPassword": {
+                                        "type": "string",
+                                        "example": "newStrongPassword123"
+                                    }
+                                },
+                                "required": [
+                                    "token",
+                                    "newPassword"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successful",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Password reset successful"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Invalid or expired token"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/change-password": {
+            "patch": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change password",
+                "description": "Allows a logged-in user to change their password using the current password.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "currentPassword": {
+                                        "type": "string",
+                                        "example": "currentSecret123"
+                                    },
+                                    "newPassword": {
+                                        "type": "string",
+                                        "example": "newStrongPassword456"
+                                    }
+                                },
+                                "required": [
+                                    "currentPassword",
+                                    "newPassword"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Password changed successfully"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid current password or bad request",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Current password is incorrect"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "message": "Unauthorized"
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -11,6 +11,7 @@ import connectDB from "./config/database";
 import swaggerDocument from "./docs/swagger.json";
 import errorHandler from "./middleware/errorHandler";
 import authRoutes from "./routes/authRoutes";
+import postRoutes from "./routes/postRoutes";
 import userRoutes from "./routes/userRoutes";
 import logger from "./utils/logger";
 
@@ -34,6 +35,8 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
+
 
 
 app.get("/api/health", (_req: Request, res: Response) => {

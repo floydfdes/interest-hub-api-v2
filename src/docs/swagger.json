@@ -56,6 +56,11 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
                                     "name": {
                                         "type": "string"
@@ -66,22 +71,17 @@
                                     "password": {
                                         "type": "string"
                                     }
-                                },
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password"
-                                ]
+                                }
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully"
+                        "description": "User registered"
                     },
                     "400": {
-                        "description": "Email already in use"
+                        "description": "Validation error"
                     }
                 }
             }
@@ -91,13 +91,17 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login an existing user",
+                "summary": "Login user",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
                                     "email": {
                                         "type": "string"
@@ -105,18 +109,14 @@
                                     "password": {
                                         "type": "string"
                                     }
-                                },
-                                "required": [
-                                    "email",
-                                    "password"
-                                ]
+                                }
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "User logged in successfully"
+                        "description": "User logged in"
                     },
                     "401": {
                         "description": "Invalid credentials"
@@ -130,27 +130,12 @@
                     "Auth"
                 ],
                 "summary": "Refresh access token",
-                "description": "Issues a new access token using the refresh token stored in cookies.",
                 "responses": {
                     "200": {
-                        "description": "New access token issued",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "token": "newAccessToken.jwt.token"
-                                }
-                            }
-                        }
+                        "description": "Token refreshed"
                     },
                     "401": {
-                        "description": "Missing or invalid refresh token",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Refresh token missing"
-                                }
-                            }
-                        }
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -161,7 +146,6 @@
                     "Auth"
                 ],
                 "summary": "Logout user",
-                "description": "Logs out the user by clearing the refresh token cookie.",
                 "security": [
                     {
                         "bearerAuth": []
@@ -169,24 +153,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully logged out",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Logged out successfully"
-                                }
-                            }
-                        }
+                        "description": "Logged out"
                     },
                     "401": {
-                        "description": "Unauthorized or missing token",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Authorization header missing or invalid"
-                                }
-                            }
-                        }
+                        "description": "Unauthorized"
                     }
                 }
             }
@@ -197,7 +167,6 @@
                     "Auth"
                 ],
                 "summary": "Request password reset",
-                "description": "Sends a password reset link to the user's email if account exists.",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -206,8 +175,7 @@
                                 "type": "object",
                                 "properties": {
                                     "email": {
-                                        "type": "string",
-                                        "example": "floyd@interesthub.io"
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -219,14 +187,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Reset link sent (or not, but message is same)",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "If an account with that email exists, a reset link has been sent."
-                                }
-                            }
-                        }
+                        "description": "Reset link sent"
                     }
                 }
             }
@@ -237,7 +198,6 @@
                     "Auth"
                 ],
                 "summary": "Reset password",
-                "description": "Resets the user's password using a valid reset token.",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -246,12 +206,10 @@
                                 "type": "object",
                                 "properties": {
                                     "token": {
-                                        "type": "string",
-                                        "example": "reset-token-here"
+                                        "type": "string"
                                     },
                                     "newPassword": {
-                                        "type": "string",
-                                        "example": "newStrongPassword123"
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -264,24 +222,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password reset successful",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Password reset successful"
-                                }
-                            }
-                        }
+                        "description": "Password reset successful"
                     },
                     "400": {
-                        "description": "Invalid or expired token",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Invalid or expired token"
-                                }
-                            }
-                        }
+                        "description": "Invalid token"
                     }
                 }
             }
@@ -292,7 +236,6 @@
                     "Auth"
                 ],
                 "summary": "Change password",
-                "description": "Allows a logged-in user to change their password using the current password.",
                 "security": [
                     {
                         "bearerAuth": []
@@ -306,12 +249,10 @@
                                 "type": "object",
                                 "properties": {
                                     "currentPassword": {
-                                        "type": "string",
-                                        "example": "currentSecret123"
+                                        "type": "string"
                                     },
                                     "newPassword": {
-                                        "type": "string",
-                                        "example": "newStrongPassword456"
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -324,34 +265,221 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Password changed successfully",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Password changed successfully"
-                                }
-                            }
-                        }
+                        "description": "Password changed"
                     },
                     "400": {
-                        "description": "Invalid current password or bad request",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Current password is incorrect"
-                                }
-                            }
-                        }
+                        "description": "Invalid password"
                     },
                     "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "example": {
-                                    "message": "Unauthorized"
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/posts": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get all posts",
+                "responses": {
+                    "200": {
+                        "description": "List of posts"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Create a new post",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "category": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "visibility": {
+                                        "type": "string",
+                                        "enum": [
+                                            "public",
+                                            "private",
+                                            "followersOnly"
+                                        ]
+                                    }
                                 }
                             }
                         }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Post created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/posts/{id}": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get post by ID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Post found"
+                    },
+                    "404": {
+                        "description": "Post not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Update post",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "category": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "visibility": {
+                                        "type": "string",
+                                        "enum": [
+                                            "public",
+                                            "private",
+                                            "followersOnly"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Post updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Delete post",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Post deleted"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Post not found"
                     }
                 }
             }

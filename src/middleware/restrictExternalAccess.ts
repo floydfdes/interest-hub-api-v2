@@ -4,9 +4,13 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 
+const openRoutes = ["/auth/login", "/auth/register"];
+
+
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 export const restrictExternalAccess = async (req: Request, res: Response, next: NextFunction) => {
-
+    console.log(req.path);
+    if (openRoutes.includes(req.path)) return next();
     const originHeader = req.headers["x-requested-with"];
 
     // If the request is from frontend, allow

@@ -22,6 +22,8 @@ export interface IUser extends Document {
         reason: string;
         date: Date;
     }[];
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
 }
 
 const UserSchema = new Schema<IUser>(

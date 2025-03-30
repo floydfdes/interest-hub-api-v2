@@ -7,6 +7,7 @@ export const createPostService = async (postData: Partial<IPost>) => {
 };
 
 export const getAllPostsService = async () => {
+
     return await Post.find()
         .populate("author", "name profilePic")
 };

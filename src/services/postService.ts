@@ -566,11 +566,16 @@ export const createSavedCollectionService = async (userId: string, name: string)
   return formatSavedCollection(collection);
 };
 
-export const getSavedCollectionsService = async (userId: string) => {
+export const getSavedCollectionsService = async (userId: string, pagination: PaginationParams) => {
   const user = await User.findOne({ _id: userId, isDeleted: false }).select("savedCollections");
   if (!user) return null;
 
-  return (user.savedCollections ?? []).map(formatSavedCollection);
+  const collections = (user.savedCollections ?? []).map(formatSavedCollection);
+  return paginatedResponse(
+    collections.slice(pagination.skip, pagination.skip + pagination.limit),
+    collections.length,
+    pagination
+  );
 };
 
 export const updateSavedCollectionService = async (

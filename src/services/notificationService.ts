@@ -39,6 +39,33 @@ const canReceiveNotification = async (recipientId: string | Types.ObjectId, type
   return preferences?.[preferenceKey] !== false;
 };
 
+const notificationMessageWithActor = async (
+  actorId: string | Types.ObjectId | undefined,
+  type: NotificationType,
+  fallbackMessage: string
+) => {
+  if (!actorId) return fallbackMessage;
+
+  const actor = await User.findOne({ _id: actorId, isDeleted: false }).select("name username");
+  const actorName = actor?.name || actor?.username;
+  if (!actorName) return fallbackMessage;
+
+  const byType: Partial<Record<NotificationType, string>> = {
+    post_liked: `${actorName} liked your post.`,
+    user_followed: `${actorName} followed you.`,
+    follow_request_received: `${actorName} requested to follow you.`,
+    follow_request_accepted: `${actorName} accepted your follow request.`,
+    comment_created: `${actorName} commented on your post.`,
+    reply_created: `${actorName} replied to you.`,
+    post_shared: `${actorName} shared a post with you.`,
+    profile_shared: `${actorName} shared a profile with you.`,
+    comment_shared: `${actorName} shared a comment with you.`,
+    user_mentioned: `${actorName} mentioned you.`,
+  };
+
+  return byType[type] ?? fallbackMessage;
+};
+
 export const createNotification = async ({
   recipientId,
   actorId,
@@ -50,6 +77,7 @@ export const createNotification = async ({
 }: CreateNotificationInput) => {
   if (actorId && toObjectId(recipientId).equals(toObjectId(actorId))) return null;
   if (!(await canReceiveNotification(recipientId, type))) return null;
+  const notificationMessage = await notificationMessageWithActor(actorId, type, message);
 
   return Notification.create({
     recipient: toObjectId(recipientId),
@@ -58,7 +86,7 @@ export const createNotification = async ({
     ...(postId && { post: toObjectId(postId) }),
     ...(commentId && { comment: toObjectId(commentId) }),
     ...(targetUserId && { targetUser: toObjectId(targetUserId) }),
-    message,
+    message: notificationMessage,
   });
 };
 

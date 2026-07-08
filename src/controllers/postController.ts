@@ -52,6 +52,12 @@ const getLimit = (value: unknown, defaultLimit = 20) => {
   return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 1), 50) : defaultLimit;
 };
 
+const isClientPostInputError = (message: string) =>
+  message === "Image is required" ||
+  message === "Image must be a data URI, base64 string, or image URL" ||
+  message === "Image upload failed" ||
+  message.startsWith("Draft is missing required fields");
+
 export const createPost = async (req: AuthRequest, res: Response) => {
   try {
     const { title, content, image, category, tags, visibility } = req.body;
@@ -79,6 +85,11 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(withModerationNotice(post));
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to create post";
+    if (isClientPostInputError(message)) {
+      res.status(400).json({ message });
+      return;
+    }
     logError("Failed to create post", error, {
       userId: req.userId,
     });
@@ -105,6 +116,11 @@ export const createDraftPost = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(post);
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to create draft post";
+    if (isClientPostInputError(message)) {
+      res.status(400).json({ message });
+      return;
+    }
     logError("Failed to create draft post", error, { userId: req.userId });
     res.status(500).json({ message: "Failed to create draft post" });
   }
@@ -120,6 +136,11 @@ export const updateDraftPost = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json(post);
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update draft post";
+    if (isClientPostInputError(message)) {
+      res.status(400).json({ message });
+      return;
+    }
     logError("Failed to update draft post", error, { postId: req.params.id, userId: req.userId });
     res.status(500).json({ message: "Failed to update draft post" });
   }
@@ -152,7 +173,7 @@ export const publishDraftPost = async (req: AuthRequest, res: Response) => {
     res.status(200).json(withModerationNotice(post));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to publish draft";
-    if (message.startsWith("Draft is missing required fields")) {
+    if (isClientPostInputError(message)) {
       res.status(400).json({ message });
       return;
     }
@@ -350,7 +371,7 @@ export const createSavedCollection = async (req: AuthRequest, res: Response) => 
 
 export const getSavedCollections = async (req: AuthRequest, res: Response) => {
   try {
-    const collections = await getSavedCollectionsService(req.userId!);
+    const collections = await getSavedCollectionsService(req.userId!, getPagination(req.query));
     if (!collections) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -678,6 +699,11 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
 
     res.json(withModerationNotice(post));
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update post";
+    if (isClientPostInputError(message)) {
+      res.status(400).json({ message });
+      return;
+    }
     logError("Failed to update post", error, { postId: req.params.id, userId: req.userId });
     res.status(500).json({ message: "Failed to update post" });
   }

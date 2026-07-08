@@ -38,7 +38,7 @@ export const createPostValidation = [
 export const updatePostValidation = [
   body("title").optional().isString(),
   body("content").optional().isString(),
-  body("image").optional().isString().withMessage("Image must be a base64 string or data URI"),
+  body("image").optional().isString().withMessage("Image must be a data URI, base64 string, or image URL"),
   body("visibility")
     .optional()
     .isIn(["public", "private", "followersOnly"])

@@ -226,7 +226,7 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 600,
-    message: { message: "Too many requests, please try again later." },
+    message: { message: "Too many requests. Please try again later." },
     standardHeaders: true,
     legacyHeaders: false,
   })

@@ -52,20 +52,36 @@ const formatSearchUser = (user: SearchUser) => {
 
 export const globalSearchService = async (query: string, viewerId?: string, limit = 5) => {
   const trimmedQuery = query.trim();
-  const regex = new RegExp(escapeRegExp(trimmedQuery), "i");
+  const normalizedQuery = trimmedQuery.replace(/^@+/, "");
+  const terms = normalizedQuery
+    .split(/[\s,]+/)
+    .map((term) => term.replace(/^@+/, "").trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  const searchTerms = [...new Set([normalizedQuery, ...terms].filter(Boolean))];
+  const regexes = searchTerms.map((term) => new RegExp(escapeRegExp(term), "i"));
   const tagRegex = new RegExp(`^${escapeRegExp(trimmedQuery.toLowerCase())}`, "i");
 
   const [users, posts, tags, savedPostIds] = await Promise.all([
     User.find({
       isDeleted: false,
       isBlocked: { $ne: true },
-      $or: [{ name: regex }, { username: regex }, { interests: regex, isPrivate: { $ne: true } }],
+      $or: regexes.flatMap((searchRegex) => [
+        { name: searchRegex },
+        { username: searchRegex },
+        { interests: searchRegex, isPrivate: { $ne: true } },
+      ]),
     })
       .select("name username profilePic bio interests isPrivate")
       .limit(limit),
     Post.find({
       ...publiclyVisible,
-      $or: [{ title: regex }, { content: regex }, { category: regex }, { tags: regex }],
+      $or: regexes.flatMap((searchRegex) => [
+        { title: searchRegex },
+        { content: searchRegex },
+        { category: searchRegex },
+        { tags: searchRegex },
+      ]),
     })
       .sort({ createdAt: -1 })
       .limit(limit)

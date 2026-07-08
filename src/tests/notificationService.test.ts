@@ -81,6 +81,13 @@ describe("notificationService", () => {
   it("creates a notification for another user", async () => {
     const notification = { _id: new mongoose.Types.ObjectId() };
     mockNotificationCreate.mockResolvedValueOnce(notification);
+    mockUserSelect
+      .mockResolvedValueOnce({
+        notificationPreferences: {
+          likes: true,
+        },
+      })
+      .mockResolvedValueOnce({ name: "John Doe", username: "john" });
 
     await expect(
       createNotification({
@@ -97,7 +104,7 @@ describe("notificationService", () => {
       actor: actorId,
       type: "post_liked",
       post: postId,
-      message: "Someone liked your post.",
+      message: "John Doe liked your post.",
     });
   });
 

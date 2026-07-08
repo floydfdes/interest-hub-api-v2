@@ -10,7 +10,6 @@ const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction
     statusCode,
   });
   res.status(statusCode).json({
-    status: "error",
     message:
       statusCode >= 500
         ? "Something went wrong. Please try again."

@@ -478,6 +478,7 @@ export const unmuteUser = async (userId: string, targetUserId: string) => {
 };
 
 export const searchUsers = async (query: string) => {
+  const normalizedQuery = query.trim().replace(/^@+/, "");
   const terms = query
     .trim()
     .replace(/^@+/, "")
@@ -486,7 +487,8 @@ export const searchUsers = async (query: string) => {
     .filter(Boolean)
     .slice(0, 5);
 
-  const termFilters = terms.map((term) => {
+  const searchTerms = [...new Set(terms.length > 1 ? terms : [normalizedQuery, ...terms].filter(Boolean))];
+  const termFilters = searchTerms.map((term) => {
     const regex = new RegExp(escapeRegExp(term), "i");
     return {
       $or: [{ name: regex }, { username: regex }, { interests: regex }],
